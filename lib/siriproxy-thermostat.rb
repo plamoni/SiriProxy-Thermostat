@@ -59,9 +59,10 @@ class SiriProxy::Plugin::Thermostat < SiriProxy::Plugin
       if status
         device_type = (status["tmode"] == 1 ? "heater" : "air conditioner")
       
-        status = HTTParty.post("http://#{self.host}/tstat", {
-          :body => "{\"tmode\":#{status["tmode"]},\"t_heat\":#{temp.to_i}}"
-        })
+        status = HTTParty.post("http://#{self.host}/tstat", :body => {
+                                                              :tmode  => status["tmode"],
+                                                              :t_heat => temp.to_i
+                                                            }.to_json)
                      
         if status["success"] == 0
           say "The #{device_type} has been set to #{temp} degrees."
