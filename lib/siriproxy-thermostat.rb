@@ -9,14 +9,14 @@ class SiriProxy::Plugin::Thermostat < SiriProxy::Plugin
   end
 
   #capture thermostat status
-  listen_for /thermostat.*status/i, -> { show_status_of_thermostat }
-  listen_for /status.*thermostat/i, -> { show_status_of_thermostat }
+  listen_for(/thermostat.*status/i) { show_status_of_thermostat }
+  listen_for(/status.*thermostat/i) { show_status_of_thermostat }
 
-  listen_for /thermostat.*([0-9]{2})/i, -> { |temp| set_thermostat(temp) }
+  listen_for(/thermostat.*([0-9]{2})/i) { |temp| set_thermostat(temp) }
 
-  listen_for /temperature.*inside/i, -> { show_temperature }
-  listen_for /inside.*temperature/i, -> { show_temperature }
-  listen_for /temperature.*in here/i, -> { show_temperature }
+  listen_for(/temperature.*inside/i) { show_temperature }
+  listen_for(/inside.*temperature/i) { show_temperature }
+  listen_for(/temperature.*in here/i) { show_temperature }
 
   def show_status_of_thermostat
     say "Checking the status of the thermostat"
