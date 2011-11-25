@@ -1,48 +1,48 @@
 require 'httparty'
 require 'json'
 
-#######
-# This is a "hello world" style plugin. It simply intercepts the phrase "text siri proxy" and responds
-# with a message about the proxy being up and running (along with a couple other core features). This 
-# is good base code for other plugins.
-# 
-# Remember to add other plugins to the "config.yml" file if you create them!
-######
-
 class SiriProxy::Plugin::Thermostat < SiriProxy::Plugin
   attr_accessor :host
 
-  def initialize(config)
+  def initialize(config = {})
     self.host = config["host"]
   end
 
   #capture thermostat status
-  listen_for /thermostat.*status/i do show_status_of_thermostat end
-  listen_for /status.*thermostat/i do show_status_of_thermostat end
+  listen_for(/thermostat.*status/i) { show_status_of_thermostat }
+  listen_for(/status.*thermostat/i) { show_status_of_thermostat }
 
-  listen_for /thermostat.*([0-9]{2})/i do |temp| set_thermostat(temp) end
+  listen_for(/thermostat.*([0-9]{2})/i) { |temp| set_thermostat(temp) }
 
-  listen_for /temperature.*inside/i do show_temperature end
-  listen_for /inside.*temperature/i do show_temperature end
-  listen_for /temperature.*in here/i do show_temperature end
+  listen_for(/temperature.*inside/i) { show_temperature }
+  listen_for(/inside.*temperature/i) { show_temperature }
+  listen_for(/temperature.*in here/i) { show_temperature }
 
   def show_status_of_thermostat
     say "Checking the status of the thermostat"
     
     Thread.new {
-      status = JSON.parse(HTTParty.get("http://#{self.host}/tstat").body)
-         
-      say "The temperature is currently #{status["temp"]} degrees."
-      say "The heater and air conditioner are turned off." if(status["tmode"] == 0)
-             
-      if(status["tmode"] == 1)
-        say "The heater is set to engage at #{status["t_heat"]} degrees."
-        say "The heater is off." if(status["tstate"] == 0)
-        say "The heater is running." if(status["tstate"] == 1)
-      elsif(status["tmode"] == 2)
-        say "The air conditioner is set to engage at #{status["t_cool"]} degrees."
-        say "The air conditioner is off." if(status["tstate"] == 0)
-        say "The air conditioner running." if(status["tstate"] == 2)
+      page = HTTParty.get("http://#{self.host}/tstat").body rescue nil
+      status = JSON.parse(page) rescue nil
+      
+      if status   
+        say "The temperature is currently #{status["temp"]} degrees."
+        
+        if status["tmode"] == 0
+          say "The heater and air conditioner are turned off." 
+        else
+          device_type = (status["tmode"] == 1 ? "heater" : "air conditioner")
+                
+          say "The #{device_type} is set to engage at #{status["t_heat"]} degrees."
+          
+          if status["tstate"] == 0
+            say "The #{device_type} is off."
+          elsif (status["tmode"] == 1 and status["tstate"] == 1) or (status["tmode"] == 2 and status["tstate"] == 2)
+            say "The #{device_type} is running."
+          end
+        end
+      else
+        say "Sorry, the thermostat is off."
       end
     
       request_completed #always complete your request! Otherwise the phone will "spin" at the user!
@@ -50,23 +50,22 @@ class SiriProxy::Plugin::Thermostat < SiriProxy::Plugin
   end
    
   def set_thermostat(temp)
-    say "One moment while I set the thermostat to #{temp} degrees"
+    say "One moment while I set the thermostat to #{temp} degrees."
 
     Thread.new {
-      status = JSON.parse(HTTParty.get("http://#{self.host}/tstat").body)
-      if(status["tmode"] == 1) #heat
-        status = HTTParty.post("http://#{self.host}/tstat", {:body => "{\"tmode\":1,\"t_heat\":#{temp.to_i}}"})
+      page = HTTParty.get("http://#{self.host}/tstat").body rescue nil
+      status = JSON.parse(page) rescue nil
+      
+      if status
+        device_type = (status["tmode"] == 1 ? "heater" : "air conditioner")
+      
+        status = HTTParty.post("http://#{self.host}/tstat", :body => {
+                                                              :tmode  => status["tmode"],
+                                                              :t_heat => temp.to_i
+                                                            }.to_json)
                      
-        if(status["success"] == 0)
-          say "The heater has been set to #{temp} degrees."
-        else
-          say "Sorry, there was a problem setting the temperature"
-        end
-      elsif(status["tmode"] == 2) #a/c
-        status = HTTParty.post("http://#{self.host}/tstat", {:body => "{\"tmode\":2,\"t_cool\":#{temp.to_i}}"})
-                
-        if(status["success"] == 0)
-          say "The air conditioner has been set to #{temp} degrees."
+        if status["success"] == 0
+          say "The #{device_type} has been set to #{temp} degrees."
         else
           say "Sorry, there was a problem setting the temperature"
         end
@@ -82,9 +81,16 @@ class SiriProxy::Plugin::Thermostat < SiriProxy::Plugin
     say "Checking the inside temperature."
     
     Thread.new {
-      status = JSON.parse(HTTParty.get("http://#{self.host}/tstat").body)
+      page = HTTParty.get("http://#{self.host}/tstat").body rescue nil
+      status = JSON.parse(page) rescue nil
+      
+      if status
         say "The current inside temperature is #{status["temp"]} degrees."      
-      }
-
+      else
+        say "Sorry, the thermostat is off."
+      end
+        
+      request_completed #always complete your request! Otherwise the phone will "spin" at the user!
+    }
   end
 end
