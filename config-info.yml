@@ -6,4 +6,11 @@
     
     - name: 'Thermostat'
       git: 'git://github.com/plamoni/SiriProxy-Thermostat.git'
-      host: '192.168.2.71' 
+      # One thermostat
+      thermostats: { "": "192.168.0.101" }
+      # Two or more thermostats
+      #thermostats: { "upstairs": "192.168.0.101", "downstairs": "192.168.0.102" }
+
+      # Optional settings for 'away'.  Values indicated are the preset defaults
+      #away_heat: 55
+      #away_cool: 86
