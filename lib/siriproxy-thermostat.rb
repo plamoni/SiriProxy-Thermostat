@@ -142,12 +142,19 @@ class SiriProxy::Plugin::Thermostat < SiriProxy::Plugin
         else
           device_type = (status["tmode"] == 1 ? "heater" : "air conditioner")
                 
-          say "The #{device_type} is set to engage at #{status["t_heat"]} degrees."
+          say "The #{device_type} is set to " + (status["hold"] == 0 ? "engage" : "hold") + " at #{status["t_heat"]} degrees."
           
+	  # Check to see if fan is set to 'on' instead of 'auto'
+	  if status["fmode"] == 2
+	    fan_status="  The fan is set to run continuously."
+	  else
+	    fan_status=""
+	  end
+
           if status["tstate"] == 0
-            say "The #{device_type} is off."
+            say "The #{device_type} is off.#{fan_status}"
           elsif (status["tmode"] == 1 and status["tstate"] == 1) or (status["tmode"] == 2 and status["tstate"] == 2)
-            say "The #{device_type} is running."
+            say "The #{device_type} is running.#{fan_status}"
           end
         end
       else
