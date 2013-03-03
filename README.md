@@ -7,11 +7,11 @@ SiriProxy-Thermostat is a SiriProxy plugin for controlling a [RadioThermostat](r
 
 Word of Warning
 ---------------
-Please be aware that programs that interact with your thermostat have the inherant dangers of causing errant temperatures, high energy usage, or even possibly mechanical problems should the software fail to perform as expected.  
+Please be aware that programs that interact with your thermostat have the inherent dangers of causing errant temperatures, high energy usage, or even possibly mechanical problems should the software fail to perform as expected.  
 
 Installation
 ------------
-After installing and configiring SiriProxy you can modify the `~/.siriproxy/config.yml` file:
+After installing and configuring SiriProxy you can modify the `~/.siriproxy/config.yml` file:
 
 	- name: 'Thermostat'
 	git: 'git://github.com/plamoni/SiriProxy-Thermostat.git'
@@ -28,41 +28,57 @@ Be sure to replace the 192.168.0.101 and 192.168.0.102 addresses with the correc
 Usage
 -----
 The following voice commands are supported.  The name 'upstairs', as assigned in the example configuration, and the temperature of 65 degrees are only used for examples:
+
 **Hold current temperature until manually changed**
-	"Hold temperature"
-	"Hold current temperature"
-	"Hold upstairs temperature"
+
+    Hold temperature
+    Hold current temperature
+    Hold upstairs temperature
 
 **Remove temperature hold**
+
 Returns to temperature set in schedule
-	"Remove temperature hold"
-	"Remove hold on temperature"
-	"Remove hold on upstairs temperature"
+
+    Remove temperature hold
+    Remove hold on temperature
+    Remove hold on upstairs temperature
 
 **Check thermostat status**
+
 Get temperature, Setpoint, and if unit is running
-	"Thermostat status"
-	"Status of upstairs thermostat"
+
+    Thermostat status
+    Status of upstairs thermostat
 
 **Set the temperature**
+
 Will be reset by a schedule change unless hold is set (see above)
-	"Set the temperature to 65 degrees"
-	"Set the upstairs temperature to 65 degrees"
+
+    Set the temperature to 65 degrees
+    Set the upstairs temperature to 65 degrees
 
 **Get the temperature**
+
 Must say 'inside', otherwise Siri defaults to telling you the weather
 If you do say 'inside' and Siri reports it is raining you may need to call a plumber
-	"What is the temperature inside" 
-	"What is the temperature upstairs"
+
+    What is the temperature inside
+    What is the temperature upstairs
 
 **Set 'away'**
+
 As seen in RadioThermostat App.  To save energy, the 'away' status will lower/raise the temperature, based on heating or cooling status, of ALL thermostats.  You will need to cancel the away status or hold(s) for the thermostat to return to normal operation.  
-	"Set thermostat to away"
+
+    Set thermostat to away
+    
 This has been manually implemented, if anyone knows of an API setting for this then please share.  Setting to 'away' via SiriProxy does not show as being set to 'away' in the RadioThermostat iPhone App.
 
+
 **Return from 'away'**
+
 Remove the 'away' status as indicated above.  This will remove holds placed on ALL configured thermostats.
-	"Set thermostat to normal"
+
+     Set thermostat to normal
 
 License (MIT)
 -------------
