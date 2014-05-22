@@ -28,6 +28,9 @@ class SiriProxy::Plugin::Thermostat < SiriProxy::Plugin
       if status   
         say "The temperature is currently #{status["temp"]} degrees."
         
+      if status["fmode"] == 2  #Check to see if the fan is set to "On".
+        say "The fan is set to run continuously."  #If the fan is set to "On" then Siri replies that is running.
+
         if status["tmode"] == 0
           say "The heater and air conditioner are turned off." 
         else
